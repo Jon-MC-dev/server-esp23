@@ -59,6 +59,19 @@ func main() {
 		return c.JSON(datos)
 	})
 
+	app.Get("/consultar/:id", func(c *fiber.Ctx) error {
+		id := c.Params("id")
+
+		var datos []model.DataModel
+		if err := db.Where("id >= ?", id).Find(&datos).Error; err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"error": "Error al consultar la base de datos",
+			})
+		}
+
+		return c.JSON(datos)
+	})
+
 	// Iniciar el servidor en el puerto 8080
 	log.Fatal(app.Listen(":8080"))
 }
