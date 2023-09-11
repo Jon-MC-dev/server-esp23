@@ -8,6 +8,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"serveresp32.com/sensor/model"
@@ -15,21 +16,25 @@ import (
 
 func main() {
 	// Conectar a la base de datos MySQL
-	// dsn := "user:pass@tcp(127.0.0.1:3306)/dbname?charset=utf8mb4&parseTime=True&loc=Local"
-	dbUser := os.Getenv("DB_USER")
-	dbPassword := os.Getenv("DB_PASSWORD")
-	dbHost := os.Getenv("DB_HOST")
-	dbPort := os.Getenv("DB_PORT")
-	dbName := os.Getenv("DB_NAME")
+	// connectionString := "user:pass@tcp(127.0.0.1:3306)/dbname?charset=utf8mb4&parseTime=True&loc=Local"
+	connectionString := "root@tcp(127.0.0.1:3306)/db_esp32?charset=utf8mb4&parseTime=True&loc=Local"
+	if os.Getenv("DB_USER") != "" {
+		dbUser := os.Getenv("DB_USER")
+		dbPassword := os.Getenv("DB_PASSWORD")
+		dbHost := os.Getenv("DB_HOST")
+		dbPort := os.Getenv("DB_PORT")
+		dbName := os.Getenv("DB_NAME")
 
-	connectionString := fmt.Sprintf(
-		"%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-		dbUser,
-		dbPassword,
-		dbHost,
-		dbPort,
-		dbName,
-	)
+		connectionString = fmt.Sprintf(
+			"%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+			dbUser,
+			dbPassword,
+			dbHost,
+			dbPort,
+			dbName,
+		)
+	}
+
 	fmt.Println(connectionString)
 
 	db, err := gorm.Open(mysql.Open(connectionString), &gorm.Config{})
@@ -43,6 +48,7 @@ func main() {
 
 	// Crear una instancia de Fiber
 	app := fiber.New()
+	app.Use(logger.New())
 
 	// Agregar middleware CORS
 	app.Use(cors.New(cors.Config{
