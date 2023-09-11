@@ -94,6 +94,10 @@ func main() {
 		return c.JSON(datos)
 	})
 
-	// Iniciar el servidor en el puerto 8080
-	log.Fatal(app.Listen(":8080"))
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "3000"
+	}
+
+	log.Fatal(app.Listen(fmt.Sprintf(":%s", port)))
 }
